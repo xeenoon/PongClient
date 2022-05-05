@@ -31,6 +31,9 @@ namespace PongClient
         public PongGameWindow()
         {
             InitializeComponent();
+
+            Networking.SetupClient();
+            
             t.Interval = 2;
             this.PreviewKeyDown += new KeyEventHandler(HandleKeyDown);
             this.PreviewKeyUp += new KeyEventHandler(HandleKeyUp);
