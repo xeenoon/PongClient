@@ -25,6 +25,30 @@ namespace PongClient
             Array.Copy(_buffer, dataBuf, recieved);
 
             string text = Encoding.ASCII.GetString(dataBuf);
+            //Text should appear in the format of ID:MOVEMENT
+            //ID is determining whether it is our BAT, the opponents BAT or the ball
+            //Movement is the new position, or the new velocities
+            int ID = int.Parse(text.Split(':')[0]);
+            int newypos = 0;
+            switch (ID)
+            {
+                case 1: //Is it our bat?
+                    newypos = int.Parse(text.Split(':')[1]);
+                    var localbat = Bat.localBat;
+                    localbat.location.Y = newypos;
+                    localbat.ModifyLocation(newypos);
+                    break;
+                case 2: //Is it the opponents bat
+                    newypos = int.Parse(text.Split(':')[1]);
+                    var remoteBat = Bat.remoteBat;
+                    remoteBat.location.Y = newypos;
+                    remoteBat.ModifyLocation(newypos);
+                    break;
+                case 3: //IS it a new velocity for the ball
+                    //WILL NOT BE IMPLEMENTED UNTIL NEXT COMMIT
+                    //TODO: implement ball velocities
+                    break;
+            }
 
             socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(RecieveCallback), socket);
         }
@@ -40,11 +64,11 @@ namespace PongClient
                     ++attempts;
                     if (DateTime.Now.Hour >= 15)
                     {
-                        _clientSocket.Connect(IPAddress.Parse("192.168.1.3"), 100);
+                        _clientSocket.Connect(IPAddress.Parse("192.168.1.3"), 9999);
                     }
                     else
                     {
-                        _clientSocket.Connect(IPAddress.Parse("172.20.17.91"), 100);
+                        _clientSocket.Connect(IPAddress.Parse("172.20.17.91"), 9999);
                     }
                 }
                 catch (Exception e)

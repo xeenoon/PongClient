@@ -16,7 +16,7 @@ namespace PongClient
     {
         WASD,
         ARROWS,
-        PORT
+        REMOTE
     }
     public enum Direction
     {
@@ -26,12 +26,15 @@ namespace PongClient
     }
     public class Bat
     {
+        public static Bat localBat;
+        public static Bat remoteBat;
+
         public const int WIDTH = 10;
         public const int HEIGHT = 50;
 
         public static readonly Brush BRUSH = Brushes.Green;
         public Rectangle graphics;
-        Point location;
+        public Point location;
 
         Canvas canvas;
         MovementType movementType;
@@ -64,12 +67,15 @@ namespace PongClient
                 case MovementType.WASD:
                     up = Key.W;
                     down = Key.S;
+                    localBat = this;
                     break;
                 case MovementType.ARROWS:
                     up = Key.Up;
                     down = Key.Down;
+                    localBat = this;
                     break;
-                case MovementType.PORT:
+                case MovementType.REMOTE:
+                    remoteBat = this;
                     break;
             }
             mainTimer.Elapsed += new ElapsedEventHandler(Tick);
@@ -80,11 +86,12 @@ namespace PongClient
             if (key == up)
             {
                 direction = Direction.UP;
-
+                SendMovement(direction);
             }
             else if (key == down)
             {
                 direction = Direction.DOWN;
+                SendMovement(direction);
             }
         }
 
@@ -184,20 +191,39 @@ namespace PongClient
         public void HandleKeyUp(Key key) //Consistency to have both methods accept a key
         {
             direction = Direction.NONE;
+            if (key == up || key == down) //Dont just spam the server with random key presses, only send movement
+            {
+                SendMovement(direction);
+            }
         }
         public void Tick(object sender, ElapsedEventArgs e)
         {
             switch (direction)
             {
                 case Direction.UP:
-                    location.Y -= 5;
-                    ModifyLocation(location.Y);
+        //            location.Y -= 5;
+        //            ModifyLocation(location.Y);
                     break;
                 case Direction.DOWN:
-                    location.Y += 5;
-                    ModifyLocation(location.Y);
+        //            location.Y += 5;
+        //            ModifyLocation(location.Y);
                     break;
                 case Direction.NONE:
+                    break;
+            }
+        }
+        private void SendMovement(Direction d)
+        {
+            switch (d)
+            {
+                case Direction.UP:
+                    Networking.Send(new byte[1] { 1 }); //On recieving end, a number of 1 signifies W or UP ARROW
+                    break;
+                case Direction.DOWN:
+                    Networking.Send(new byte[1] { 2 }); //On recieving end, a number of 2 signifies S or DOWN ARROW
+                    break;
+                case Direction.NONE:
+                    Networking.Send(new byte[1] { 3 }); //On recieving end, a number of 3 signifies the RELEASE of any movement (W,S,UP,DOWN)
                     break;
             }
         }

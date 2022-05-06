@@ -39,7 +39,7 @@ namespace PongClient
             this.PreviewKeyUp += new KeyEventHandler(HandleKeyUp);
 
             player1 = new Bat(MainCanvas, new Point(50, 50), t, MovementType.WASD);
-            player2 = new Bat(MainCanvas, new Point(630, 50), t, MovementType.ARROWS);
+            player2 = new Bat(MainCanvas, new Point(630, 50), t, MovementType.REMOTE);
 
             ball = new Ball(MainCanvas, new Point(300, 300), t, new VelocityVector(new Point(300, 300), Velocities.Random()), player1, player2);
 
